@@ -1,0 +1,455 @@
+﻿<Window x:Class="KdbConnections.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Kdb Connections Application" Height="450" Width="725"
+        MinWidth="700" MinHeight="450"
+        Loaded="Window_Loaded">
+    <Grid Background="LightGray">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.RowDefinitions >
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions >
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Label Content="Server" Height="28" Grid.Row="0" Grid.Column="0" Margin="5" />
+            <Label Content="Port" Height="28" Grid.Row="0" Grid.Column="2" Margin="5"  />
+            
+            <TextBox Text="localhost" Name="txtServer" Grid.Column="1" Margin="5" Width="120" Height="22"  />
+            <TextBox Text="9090" Name="txtPort" Grid.Row="0" Grid.Column="3" Margin="5" Width="80" MaxLength="4" />
+            
+            <Button Content="Connect" Name="btnConnect" Width="70" Grid.Column="5" Margin="5" Click="btnConnect_Click"/>
+            <Ellipse Name="statusConnectionLight" Grid.Column="4" Fill="Red" Height="15" Width="15" Margin="5" />
+            
+            <Label Content="Message:" Grid.Row="1" Grid.Column="0" Margin="5" />
+            <Label Name="lblErrorMessage" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5" Margin="5" MaxWidth="400" Width="372" Background="White">
+                <TextBlock TextWrapping="WrapWithOverflow" Name="txtErrorMessage" />
+            </Label>
+        </Grid>
+
+        <TabControl Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="7" Margin="5" Name="tabControl" SelectionChanged="tabControl_SelectionChanged" >
+            
+            <TabItem Header="Students" >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="90" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Margin="5" Grid.Row="0" Grid.ColumnSpan="1" Text="Below is a list of students, detailing their name, age, gender, DOB and outstanding course fee. This is the list, or table that will be loaded into the q session from this App." TextWrapping="WrapWithOverflow" />
+                    <Button Content="Load into q" Grid.Column="1" Margin="5" Name="btnLoad" Click="btnLoad_Click"/>
+                    
+                    <DataGrid Name="dataGridStudentsTable" 
+                        ItemsSource="{Binding StudentNames}"
+                        Grid.Row="1" Grid.ColumnSpan="2"
+                        VerticalAlignment="Stretch"    
+                        HorizontalAlignment="Stretch"
+                        AutoGenerateColumns="False" 
+                        IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Path=Name}" Width="Auto" />
+                            <DataGridTextColumn Header="Gender" Binding="{Binding Path=Gender}" Width="Auto" />
+                            <DataGridTextColumn Header="Age" Binding="{Binding Path=Age}" Width="Auto" />
+                            <DataGridTextColumn Header="D.O.B" Binding="{Binding Path=DOB,StringFormat='{}{0:dd/MM/yyyy}'}" Width="Auto" />
+                            <DataGridTextColumn Header="Outstanding Fee (£)" Binding="{Binding Path=OutStandingFee}" Width="Auto" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+                
+            </TabItem>
+            
+            <TabItem Header="Select From">
+                <Grid >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox Text="select from dbversion" Grid.Row="0" Grid.Column="0" Margin="5" IsEnabled="False" />
+                    <Button Name="btnGetDBVersion" Grid.Column="1"  Grid.Row="0" Width="35" Click="btnGetDBVersion_Click" Content="Go" Margin="5"/>
+                    <Label Height="25" Name="lblDBVersion" Grid.Row="0" Grid.Column="2" Width="100" Margin="5"/>
+                    <TextBlock Text="Returns a single piece of data containing the version number of a fictional database" TextWrapping="WrapWithOverflow" Name="lblDB" Grid.Row="0" Grid.Column="3" Margin="5"/>
+
+                    <TextBox Name="txtSelectStudent" Text="select from student" Grid.Row="1" Grid.Column="0" Margin="5" IsEnabled="False" Width="Auto" />
+                    <Button Name="btnSelectStudentTable" Grid.Column="1"  Grid.Row="1" Width="35" Click="btnSelectStudentTable_Click" Content="Go" Margin="5"/>
+                    
+                    <TextBlock Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Grid.ColumnSpan="2" TextWrapping="WrapWithOverflow" 
+                               Text="These queries work by submitting them as a string using the c.k method. The first 'select from student' returns back the student table from the database. The second returns back all students in the table where gender=f, and the final query returns students where gender=m AND age is greater or equal to 20. The returned data is display in the grid below"
+                               />
+
+                    <TextBox Text="select from student where gender=`f" Grid.Row="2" Grid.Column="0" Margin="5" Name="txtStudentQuery" IsEnabled="False" />
+                    <Button Name="btnGenderQuery" Grid.Column="1"  Grid.Row="2" Width="35" Click="btnGenderQuery_Click" Content="Go" Margin="5"/>
+
+                    <TextBox Text="select from student where gender=`m,age&gt;=20" Grid.Row="3" Grid.Column="0" Margin="5" Name="txtQueryGenderAge" />
+                    <Button Name="btnGenderAge" Grid.Column="1"  Grid.Row="3" Width="35" Click="btnGenderAge_Click" Content="Go" Margin="5"/>
+
+                    <DataGrid Name="dataGridResult1" 
+                        ItemsSource="{Binding ReturnedStudentData}"
+                        Grid.Row="4" Grid.ColumnSpan="4"
+                        VerticalAlignment="Stretch"    
+                        HorizontalAlignment="Stretch"
+                        AutoGenerateColumns="False" 
+                        IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Path=Name}" Width="Auto" />
+                            <DataGridTextColumn Header="Gender" Binding="{Binding Path=Gender}" Width="Auto" />
+                            <DataGridTextColumn Header="Age" Binding="{Binding Path=Age}" Width="Auto" />
+                            <DataGridTextColumn Header="D.O.B" Binding="{Binding Path=DOB,StringFormat='{}{0:dd/MM/yyyy}'}" Width="Auto" />
+                            <DataGridTextColumn Header="Outstanding Fee (£)" Binding="{Binding Path=OutStandingFee}" Width="Auto" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Single Name" >
+                <Grid >
+                    <Grid.RowDefinitions>
+
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock  Grid.ColumnSpan="2" Grid.Column="2" Grid.Row="0" TextWrapping="WrapWithOverflow" 
+                        Text="Select a student name from the drop-down and click Go. Thie performs a simple select from student query using a parameterised query in the form; &quot;{[x]select from student where name=x}&quot; "/>
+                        
+                    <ComboBox Name="comboNameSelection" 
+                              ItemsSource="{Binding StudentNames}"
+                              Grid.Row="0" 
+                              Grid.Column="0"
+                              Margin="5"
+                              Height="27"
+                              DisplayMemberPath="Name"
+                              SelectedValuePath="Name"
+                              Width="159"/>
+
+                    <Button Name="btnSingleName" Click="btnSingleName_Click" Content="Go" Grid.Row="0" Grid.Column="1" Margin="5" />
+
+                    <DataGrid Name="dataGridResults2" 
+                        ItemsSource="{Binding ReturnedStudentData}"
+                        Grid.Row="1"
+                        VerticalAlignment="Stretch"    
+                        HorizontalAlignment="Stretch"
+                        AutoGenerateColumns="False" 
+                        Grid.ColumnSpan="4"
+                        IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Path=Name}" Width="Auto" />
+                            <DataGridTextColumn Header="Gender" Binding="{Binding Path=Gender}" Width="Auto" />
+                            <DataGridTextColumn Header="Age" Binding="{Binding Path=Age}" Width="Auto" />
+                            <DataGridTextColumn Header="D.O.B" Binding="{Binding Path=DOB,StringFormat='{}{0:dd/MM/yyyy}'}" Width="Auto" />
+                            <DataGridTextColumn Header="Outstanding Fee (£)" Binding="{Binding Path=OutStandingFee}" Width="Auto" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Age Range">
+                <Grid >
+                    <Grid.RowDefinitions >
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Content="From Age:" Grid.Row="0" Grid.Column="0" />
+                    <Label Content="To Age:" Grid.Row="1" Grid.Column="0" />
+
+                    <TextBox Name="txtFromAge" Text="19" Grid.Row="0" Grid.Column="1" Margin="5" Width="40"/>
+                    <TextBox Name="txtToAge" Text="24" Grid.Row="1" Grid.Column="1" Margin="5" Width="40" />
+
+                    <Button Name="btnAgeRange" Content="Go" Click="btnAgeRange_Click" Width="50" Height="40" Margin="5" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" VerticalAlignment="Center" />
+                    
+                    <TextBlock TextWrapping="WrapWithOverflow" Grid.Row="0" Grid.RowSpan="2" Grid.Column="3" 
+                               Text="After inputting an upper and lower age limit, these are passed into the object array along with the relevant query statement. This is executed again as a parameterised query"
+                               />
+
+                    <DataGrid Name="dataGridResultsAgeRange" 
+                        ItemsSource="{Binding ReturnedStudentData}"
+                        Grid.Row="2"
+                        VerticalAlignment="Stretch"    
+                        HorizontalAlignment="Stretch"
+                        AutoGenerateColumns="False" 
+                        Grid.ColumnSpan="4"
+                        IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Path=Name}" Width="Auto" />
+                            <DataGridTextColumn Header="Gender" Binding="{Binding Path=Gender}" Width="Auto" />
+                            <DataGridTextColumn Header="Age" Binding="{Binding Path=Age}" Width="Auto" />
+                            <DataGridTextColumn Header="D.O.B" Binding="{Binding Path=DOB,StringFormat='{}{0:dd/MM/yyyy}'}" Width="Auto" />
+                            <DataGridTextColumn Header="Outstanding Fee (£)" Binding="{Binding Path=OutStandingFee}" Width="Auto" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="List of Names" >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <DataGrid Name="datagridStudentNames"
+                                Margin="5"
+                                ItemsSource="{Binding StudentNames}"
+                                Width="200" 
+                                Height="140"
+                                AutoGenerateColumns="False"
+                                CanUserAddRows="False"
+                                Grid.Row="0">
+
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="Auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Name="checkStudentSelect" 
+                                                  Checked="checkStudentSelect_Checked"
+                                                  Unchecked="checkStudentSelect_Unchecked"
+                                                  HorizontalAlignment="Center" 
+                                                  VerticalAlignment="Center" 
+                                                  Margin="3,1"
+                                                  IsChecked="{Binding Path=IsSelected, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Path=Name}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Button Name="btnQueryListOfNames" Click="btnQueryListOfNames_Click" Margin="5" Content="Go" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+                    <TextBlock Grid.Row="0" Grid.Column="2" TextWrapping="WrapWithOverflow" 
+                               Text="Select multiple names in the grid in the left, and click grow. The list of selected names will be passed in as a string array together with with the query statement, and return students from the table with the selected names "
+                               />
+                    <DataGrid Name="dataGridResults3" 
+                        ItemsSource="{Binding ReturnedStudentData}"
+                        Grid.Row="1"
+                        VerticalAlignment="Stretch"    
+                        HorizontalAlignment="Stretch"
+                        AutoGenerateColumns="False" 
+                        Grid.ColumnSpan="3"
+                        IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Path=Name}" Width="Auto" />
+                            <DataGridTextColumn Header="Gender" Binding="{Binding Path=Gender}" Width="Auto" />
+                            <DataGridTextColumn Header="Age" Binding="{Binding Path=Age}" Width="Auto" />
+                            <DataGridTextColumn Header="D.O.B" Binding="{Binding Path=DOB,StringFormat='{}{0:dd/MM/yyyy}'}" Width="Auto" />
+                            <DataGridTextColumn Header="Outstanding Fee (£)" Binding="{Binding Path=OutStandingFee}" Width="Auto" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Names and Age" >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <DataGrid Name="datagridStudentNames3"
+                                Margin="5"
+                                ItemsSource="{Binding StudentNames}"
+                                Width="200" 
+                                Height="130"
+                                VerticalAlignment="Stretch"
+                                AutoGenerateColumns="False"
+                                CanUserAddRows="False"
+                                Grid.Row="0">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="Auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Name="checkStudentSelect" 
+                                                  Checked="checkStudentSelect_Checked"
+                                                  Unchecked="checkStudentSelect_Unchecked"
+                                                  HorizontalAlignment="Center" 
+                                                  VerticalAlignment="Center" 
+                                                  Margin="3,1"
+                                                  IsChecked="{Binding Path=IsSelected, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Path=Name}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Label Content="From Age:" Grid.Row="0" Grid.Column="1" Height="25" />
+                    <TextBox Name="txtFromAge2" Text="19" Grid.Row="0" Grid.Column="2" Margin="5" Width="40" Height="25"/>
+                    <Button Name="btnQueryListNamesAndAgeValue" Click="btnQueryListNamesAndAgeValue_Click" Margin="5" Height="40" Width="40" Content="Go" Grid.Row="0" Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    
+                    <TextBlock TextWrapping="WrapWithOverflow" Grid.Row="0" Grid.Column="4"
+                               Text="Similar to the previous tab, select multiple names in the grid and enter a low age limit. The Go button performs a query on the student table returning students whose names have been selected and age is greater than or equal to the From Age value entered"
+                               />
+
+                    <DataGrid Name="dataGridResults5" 
+                        ItemsSource="{Binding ReturnedStudentData}"
+                        Grid.Row="3"
+                        VerticalAlignment="Stretch"    
+                        HorizontalAlignment="Stretch"
+                        AutoGenerateColumns="False" 
+                        Grid.ColumnSpan="5"
+                        IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Path=Name}" Width="Auto" />
+                            <DataGridTextColumn Header="Gender" Binding="{Binding Path=Gender}" Width="Auto" />
+                            <DataGridTextColumn Header="Age" Binding="{Binding Path=Age}" Width="Auto" />
+                            <DataGridTextColumn Header="D.O.B" Binding="{Binding Path=DOB,StringFormat='{}{0:dd/MM/yyyy}'}" Width="Auto" />
+                            <DataGridTextColumn Header="Outstanding Fee (£)" Binding="{Binding Path=OutStandingFee}" Width="Auto" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+
+            </TabItem>
+
+            <TabItem Header="Names, Ages and Gender" >
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120" />
+                        <ColumnDefinition Width="120" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+
+                        <RowDefinition Height="150" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    
+                    <DataGrid Name="datagridStudentNames2"
+                                Margin="5"
+                                ItemsSource="{Binding StudentNames}"
+                                Height="140"
+                                AutoGenerateColumns="False"
+                                CanUserAddRows="False"
+                                Grid.Row="0">
+
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="Auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Name="checkStudentSelect" 
+                                                  Checked="checkStudentSelect_Checked"
+                                                  Unchecked="checkStudentSelect_Unchecked"
+                                                  HorizontalAlignment="Center" 
+                                                  VerticalAlignment="Center" 
+                                                  Margin="3,1"
+                                                  IsChecked="{Binding Path=IsSelected, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Path=Name}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <DataGrid Name="datagridStudentAges"
+                                Margin="5"
+                                ItemsSource="{Binding StudentAges}"
+                                AutoGenerateColumns="False"
+                                CanUserAddRows="False"
+                                Grid.Row="0"
+                                Grid.Column="1">
+                        
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="Auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Name="checkAge" 
+                                                  Checked="checkAge_Checked"
+                                                  Unchecked="checkAge_Unchecked"
+                                                  HorizontalAlignment="Center" 
+                                                  VerticalAlignment="Center" 
+                                                  Margin="3,1"
+                                                  IsChecked="{Binding Path=IsSelected, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Age" Binding="{Binding Path=Age}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10" >
+                        <RadioButton Content="male" Margin="5" Name="radioMale"/>
+                        <RadioButton Content="female" Margin="5" Name="radioFemale" />
+                    </StackPanel>
+                        
+                    <Button Grid.Column="3" Grid.Row="0" Content="Go" Height="23" HorizontalAlignment="Left" Margin="5" Name="btnQueryNamesAndAges" VerticalAlignment="Center" Width="75" Click="btnQueryNamesAndAges_Click" />
+
+                    <TextBlock Grid.Row="0" Grid.Column="5" TextWrapping="WrapWithOverflow"
+                               Text="Select multiple names and ages from the two grids, and then specify a gender. This is executed as a parameterised query, passing in the names as an array of strings, the ages as an array of ints, and the gender as a string. Note none of the parameters can be empty, so at least one name, age and gender should be selected. If no results are returned, it means there are no students in the table that match the criteria"
+                               />
+                    
+                    <DataGrid Name="dataGridResults4" 
+                        ItemsSource="{Binding ReturnedStudentData}"
+                        Grid.Row="2"
+                        VerticalAlignment="Stretch"    
+                        HorizontalAlignment="Stretch"
+                        AutoGenerateColumns="False" 
+                        Grid.ColumnSpan="5"
+                        IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Path=Name}" Width="Auto" />
+                            <DataGridTextColumn Header="Gender" Binding="{Binding Path=Gender}" Width="Auto" />
+                            <DataGridTextColumn Header="Age" Binding="{Binding Path=Age}" Width="Auto" />
+                            <DataGridTextColumn Header="D.O.B" Binding="{Binding Path=DOB,StringFormat='{}{0:dd/MM/yyyy}'}" Width="Auto" />
+                            <DataGridTextColumn Header="Outstanding Fee (£)" Binding="{Binding Path=OutStandingFee}" Width="Auto" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

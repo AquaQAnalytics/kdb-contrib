@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WebSocket and kdb+ • First Steps</title>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <h3>In Chrome or Firefox, press F12 to open the developer console</h3>
+    <p id="result"></p>
+  <!-- kx's c.js script is required for serializing and deserializing messages -->
+  <script src="c.js"></script>
+  <script type="text/javascript">
+  var ws = new WebSocket('ws://localhost:1234');
+  // Required by c.js 
+  ws.binaryType = 'arraybuffer';
+  // WebSocket event handlers
+  ws.onopen = function () {
+    console.log("Open");
+    // Sends a JSON encoded message
+    ws.sendcmd("sum",2,3);
+  };
+  ws.onclose = function () {
+    console.log("Closed");
+  };
+  ws.onmessage = function (event) {
+    var data = JSON.parse(deserialize(event.data));
+    console.log(data.data);
+  };
+  ws.onerror = function (error) {
+    console.log("Error " + error.data);
+  };
+  // Used to send function calls to kdb+. e.g. ("sum",1,2,3)
+  ws.sendcmd = function (args) {
+    if(arguments.length<=1) return false;
+    var len = arguments.length,data = {},i;
+    // First argument used as func property, rest are used as arg properties  
+    data['func'] = arguments[0];
+    for(i=1;i<len;i++){
+      data['arg'+i] = arguments[i];
+    }
+    ws.send(serialize(JSON.stringify(data)));
+  };
+  </script>
+  </body>
+</html>
